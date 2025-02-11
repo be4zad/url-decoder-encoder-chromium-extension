@@ -1,0 +1,13 @@
+{
+    "name": "URL Bar Decoder/Encoder",
+    "version": "1.0",
+    "description": "A simple extension to decode/encode URL of the URL bar for Chromium-based browsers.",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "icon.png"
+    },
+    "permissions": [
+        "activeTab"
+    ]
+}
