@@ -4,7 +4,7 @@
     lastFocusedWindow: true,
   });
 
-  var url = decodeURI(tab.url);
+  var url = decodeURI(encodeURI(tab.url));
   url = url.replace("%23", "#");
   document.getElementById("url-input").value = url;
 
