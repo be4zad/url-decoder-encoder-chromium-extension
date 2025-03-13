@@ -1,10 +1,58 @@
-(async () => {
-  const [tab] = await chrome.tabs.query({
-    active: true,
-    lastFocusedWindow: true,
-  });
+function enableSoftWrap() {
+  document.getElementById("soft-wrap").checked = true;
+  document.getElementById("url-input").wrap = "soft";
+  document.getElementById("url-input").classList.remove('softWrapDisabled');
+  document.getElementById("url-input").classList.add('softWrapEnabled');
+}
 
-  var url = decodeURI(encodeURI(tab.url));
+function disableSoftWrap() {
+  document.getElementById("soft-wrap").checked = false;
+  document.getElementById("url-input").wrap = "off";
+  document.getElementById("url-input").classList.remove('softWrapEnabled');
+  document.getElementById("url-input").classList.add('softWrapDisabled');
+}
+
+function goButtonClicked() {
+  var url = document.getElementById("url-input").value;
+
+  if (document.getElementById("encode-hashtag").checked) {
+    url = url.replace("#", "%23");
+  }
+
+  chrome.tabs.update(undefined, { url: url });
+}
+
+function encodeHashtagCheckboxChanged() {
+  if (this.checked) {
+    chrome.storage.sync.set({ encodeHashtagLastTimeChecked: true });
+  } else {
+    chrome.storage.sync.set({ encodeHashtagLastTimeChecked: false });
+  }
+}
+
+function softWrapCheckboxChanged() {
+  if (this.checked) {
+    chrome.storage.sync.set({ softWrapChecked: true });
+    enableSoftWrap();
+  } else {
+    chrome.storage.sync.set({ softWrapChecked: false });
+    disableSoftWrap();
+  }
+}
+
+function urlInputKeyPressed(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.getElementById("go-button").click();
+  }
+}
+
+(async () => {
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true, });
+
+  var url = tab.url;
+  url = url.replace(/%(?![0-9a-fA-F]{2})/g, '%25');
+  url = decodeURI(url);
   url = url.replace("%23", "#");
   document.getElementById("url-input").value = url;
 
@@ -13,30 +61,17 @@
       document.getElementById("encode-hashtag").checked = true;
     }
   });
-})();
-
-document.getElementById("go-button").addEventListener("click", () => {
-  var url = document.getElementById("url-input").value;
-
-  if (document.getElementById("encode-hashtag").checked) {
-    url = url.replace("#", "%23");
-  }
-
-  chrome.tabs.update(undefined, { url: url });
-});
-
-document.getElementById("url-input").addEventListener("keypress", (event) => {
-  if (event.key === "Enter") {
-    document.getElementById("go-button").click();
-  }
-});
-
-document
-  .getElementById("encode-hashtag")
-  .addEventListener("change", function () {
-    if (this.checked) {
-      chrome.storage.sync.set({ encodeHashtagLastTimeChecked: true });
+  
+  chrome.storage.sync.get("softWrapChecked", function (data) {
+    if (data.softWrapChecked == true) {
+      enableSoftWrap();
     } else {
-      chrome.storage.sync.set({ encodeHashtagLastTimeChecked: false });
+      disableSoftWrap();
     }
   });
+})();
+
+document.getElementById("go-button").addEventListener("click", goButtonClicked);
+document.getElementById("url-input").addEventListener("keypress", urlInputKeyPressed);
+document.getElementById("encode-hashtag").addEventListener("change", encodeHashtagCheckboxChanged);
+document.getElementById("soft-wrap").addEventListener("change", softWrapCheckboxChanged);

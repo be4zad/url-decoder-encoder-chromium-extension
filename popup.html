@@ -11,6 +11,15 @@
 
       #url-input {
         width: 700px;
+      }
+
+      .softWrapEnabled {
+        padding: 10px;
+        word-break: break-all;
+        field-sizing: content;
+      }
+
+      .softWrapDisabled {
         padding: 10px;
         box-sizing: border-box;
       }
@@ -19,12 +28,12 @@
 
   <body>
     <h3>URL Bar Decoder/Encoder</h3>
-    <input type="text" id="url-input" autofocus />
+    <textarea type="text" id="url-input" wrap="off" spellcheck="false" autofocus></textarea>
     <input type="button" id="go-button" value="Go" /><br />
     <input type="checkbox" id="encode-hashtag" />
-    <label for="encode-hashtag"
-      >Replace # with %23 to disable fragment identifier when encoding</label
-    >
+    <label for="encode-hashtag">Replace # with %23 to disable fragment identifier when encoding</label>
+    <input type="checkbox" id="soft-wrap" checked="true" />
+    <label for="soft-wrap">Soft wrap</label>
   </body>
   <script src="popup.js"></script>
 </html>
