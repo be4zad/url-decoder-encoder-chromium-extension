@@ -14,6 +14,17 @@ function disableSoftWrap() {
 
 function goButtonClicked() {
   var url = document.getElementById("url-input").value;
+  url = new URL(decodeURIComponent(url))
+
+  if (document.getElementById('urlencode-query-strings').checked) {
+    url.searchParams.forEach(function(part, index, arr) {
+      arr[index] = encodeURIComponent(part)
+    });
+
+    url.search = url.searchParams.toString()
+  }
+
+  url = url.toString()
 
   if (document.getElementById("encode-hashtag").checked) {
     url = url.replace("#", "%23");
@@ -40,6 +51,14 @@ function softWrapCheckboxChanged() {
   }
 }
 
+function URLEncodeQueryStringsCheckboxChanged() {
+  if (this.checked) {
+    chrome.storage.sync.set({ URLEncodeQueryStringsChecked: true });
+  } else {
+    chrome.storage.sync.set({ URLEncodeQueryStringsChecked: false });
+  }
+}
+
 function urlInputKeyPressed(event) {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -52,8 +71,9 @@ function urlInputKeyPressed(event) {
 
   var url = tab.url;
   url = url.replace(/%(?![0-9a-fA-F]{2})/g, '%25');
-  url = decodeURI(url);
-  url = url.replace("%23", "#");
+  url = new URL(url);
+  // url = url.replace("%23", "#");
+  url = decodeURIComponent(url);
   document.getElementById("url-input").value = url;
 
   chrome.storage.sync.get("encodeHashtagLastTimeChecked", function (data) {
@@ -69,9 +89,18 @@ function urlInputKeyPressed(event) {
       disableSoftWrap();
     }
   });
+  
+  chrome.storage.sync.get("URLEncodeQueryStringsChecked", function (data) {
+    if (data.URLEncodeQueryStringsChecked == true) {
+      document.getElementById('urlencode-query-strings').checked = true;
+    } else {
+      document.getElementById('urlencode-query-strings').checked = false;
+    }
+  });
 })();
 
 document.getElementById("go-button").addEventListener("click", goButtonClicked);
 document.getElementById("url-input").addEventListener("keypress", urlInputKeyPressed);
 document.getElementById("encode-hashtag").addEventListener("change", encodeHashtagCheckboxChanged);
 document.getElementById("soft-wrap").addEventListener("change", softWrapCheckboxChanged);
+document.getElementById("urlencode-query-strings").addEventListener("change", URLEncodeQueryStringsCheckboxChanged);
