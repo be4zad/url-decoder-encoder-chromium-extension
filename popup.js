@@ -14,6 +14,7 @@ function disableSoftWrap() {
 
 function goButtonClicked() {
   var url = document.getElementById("url-input").value;
+  url = url.replace(/%(?![0-9a-fA-F]{2})/g, '%25');
   url = new URL(decodeURIComponent(url))
 
   if (document.getElementById('urlencode-query-strings').checked) {
